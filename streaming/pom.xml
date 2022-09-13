@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>org.example</groupId>
+    <artifactId>streaming</artifactId>
+    <version>1.0-SNAPSHOT</version>
+
+    <properties>
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
+        <flink.version>1.13.2</flink.version>
+    </properties>
+
+    <dependencies>
+
+        <dependency>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>flink-streaming-java_2.12</artifactId>
+            <version>${flink.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>flink-connector-kafka_2.12</artifactId>
+            <version>${flink.version}</version>
+        </dependency>
+
+    </dependencies>
+
+    <build>
+
+        <plugins>
+
+            <plugin>
+                <artifactId>maven-assembly-plugin</artifactId>
+
+               <executions>
+                    <execution>
+                        <id>AccountSumming</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+
+                        <configuration>
+                            <archive>
+                                <manifestEntries>
+                                    <program-class>
+                                        flinkstreaming.AccountSumming
+                                    </program-class>
+                                </manifestEntries>
+                            </archive>
+
+                            <descriptorRefs>
+                                <descriptorRef>jar-with-dependencies</descriptorRef>
+                            </descriptorRefs>
+                            <finalName>${project.build.finalName}-AccountSumming</finalName>
+                            <appendAssemblyId>false</appendAssemblyId>
+                        </configuration>
+
+                    </execution>
+
+                    <execution>
+                        <id>TransactionSumming</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+
+                        <configuration>
+                            <archive>
+                                <manifestEntries>
+                                    <program-class>
+                                        flinkstreaming.TransactionSumming
+                                    </program-class>
+                                </manifestEntries>
+                            </archive>
+
+                            <descriptorRefs>
+                                <descriptorRef>jar-with-dependencies</descriptorRef>
+                            </descriptorRefs>
+                            <finalName>${project.build.finalName}-TransactionSumming</finalName>
+                            <appendAssemblyId>false</appendAssemblyId>
+                        </configuration>
+
+                    </execution>
+
+                </executions>
+
+
+            </plugin>
+
+            <!--plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>default</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>test-jar</goal>
+                        </goals>
+                    </execution>
+
+                    <execution>
+                        <id>AccountStreaming</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                        <configuration>
+                            <classifier>AccountStreaming</classifier>
+
+                            <archive>
+                                <manifestEntries>
+                                    <program-class>
+                                        flinkstreaming.AccountSumming
+                                    </program-class>
+                                </manifestEntries>
+                            </archive>
+
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin-->
+
+        </plugins>
+
+    </build>
+</project>
