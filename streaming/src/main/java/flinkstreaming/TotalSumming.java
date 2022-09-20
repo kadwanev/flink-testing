@@ -43,9 +43,8 @@ public class TotalSumming {
         DataStreamSource<String> transactionsStream =  env.fromSource(
                 transactionsKafkaSource, WatermarkStrategy.noWatermarks(), "Transactions Stream");
 
-//        accountsStream.join(transactionsStream).
-
         accountsStream
+                .union(transactionsStream)
                 .map(Integer::parseInt)
                 .countWindowAll(10)
                 .sum("0")

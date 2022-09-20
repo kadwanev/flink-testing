@@ -14,13 +14,13 @@ TOPICS = {
         'partitions': [
             {
                 'time': range(30,50), 
-                'type': 'randNumber',
-                'message': range(5,20)
+                'type': 'randNumberPair',
+                'message': { 'first': range(400,410), 'second': range(5000,20000) }
             },
             {
                 'time': range(30,50),
-                'type': 'randNumber',
-                'message': range(0,5)
+                'type': 'randNumberPair',
+                'message': { 'first': range(400,410), 'second': range(5000,20000) }
             }
         ]
     },
@@ -29,28 +29,53 @@ TOPICS = {
         'partitions': [
             {
                 'time': range(1,40),
+                'type': 'randNumberPair',
+                'message': { 'first': range(400,450), 'second': range(1,125) }
+            },
+            {
+                'time': range(1,40),
+                'type': 'randNumberPair',
+                'message': { 'first': range(400,450), 'second': range(1,125) }
+            },
+            {
+                'time': range(1,40),
+                'type': 'randNumberPair',
+                'message': { 'first': range(400,450), 'second': range(1,125) }
+            },
+            {
+                'time': range(1,40),
+                'type': 'randNumberPair',
+                'message': { 'first': range(400,450), 'second': range(1,125) }
+            }
+        ]
+    },
+    'VISIT': {
+        'name': 'visits',
+        'partitions': [
+            {
+                'time': range(1,10),
                 'type': 'randNumber',
                 'message': range(1,500)
             },
             {
-                'time': range(1,40),
+                'time': range(1,10),
                 'type': 'randNumber',
-                'message': range(1,300)
+                'message': range(0,30)
             },
             {
-                'time': range(1,40),
-                'type': 'randNumber',
-                'message': range(1,100)
-            },
-            {
-                'time': range(1,40),
+                'time': range(1,10),
                 'type': 'randNumber',
                 'message': range(1,500)
             },
             {
-                'time': range(1,40),
+                'time': range(1,10),
                 'type': 'randNumber',
-                'message': range(30,300)
+                'message': range(10,40)
+            },
+            {
+                'time': range(1,10),
+                'type': 'randNumber',
+                'message': range(1,500)
             }
         ]
     }
@@ -66,21 +91,32 @@ def runGenerator(log, topicName, partitionIdx):
             msg = random.randrange(range.start, range.stop)
             return msg
         return g
+    def msgRandNumberPair(config):
+        def g():
+            msg = str(random.randrange(config['first'].start, config['first'].stop)) + "," + \
+                  str(random.randrange(config['second'].start, config['second'].stop))
+            return msg
+        return g
     
     header = str.format("%s(%d)" % (topicName, partitionIdx))
     topic = TOPICS[topicName]
     partition = topic['partitions'][partitionIdx]
-    generator = msgRandNumber(partition['message'])
+    generator = None
+    if partition['type'] == 'randNumber':
+        generator = msgRandNumber(partition['message'])
+    elif partition['type'] == 'randNumberPair':
+        generator = msgRandNumberPair(partition['message'])
+    else:
+        raise "unknown generator type: " + partition['type']
     while True:
         waitTime = random.randint(partition['time'].start, partition['time'].stop)
         print(str.format("%s: Waiting %d secs" % (header, waitTime)))
         time.sleep(waitTime)
         value = str(generator())
-        print(str.format("%s: Generated %s" % (header, value)))
+        print(str.format("\t%s: Generated %s" % (header, value)))
         producer.send(topic['name'], value=value, partition=partitionIdx)
         
         
-
 if __name__ == '__main__':
 
     from multiprocessing import Process, Queue

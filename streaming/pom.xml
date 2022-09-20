@@ -114,6 +114,31 @@
 
                    </execution>
 
+                   <execution>
+                       <id>VisitCounting</id>
+                       <phase>package</phase>
+                       <goals>
+                           <goal>single</goal>
+                       </goals>
+
+                       <configuration>
+                           <archive>
+                               <manifestEntries>
+                                   <program-class>
+                                       flinkstreaming.VisitCounting
+                                   </program-class>
+                               </manifestEntries>
+                           </archive>
+
+                           <descriptorRefs>
+                               <descriptorRef>jar-with-dependencies</descriptorRef>
+                           </descriptorRefs>
+                           <finalName>${project.build.finalName}-VisitCounting</finalName>
+                           <appendAssemblyId>false</appendAssemblyId>
+                       </configuration>
+
+                   </execution>
+
                </executions>
 
 

@@ -15,6 +15,8 @@ public class Config {
     public static final String TOPIC_TRANSACTIONS = "transactions";
     public static final String TOPIC_TRANSACTIONS_TOTALS = "transactionsTotal";
 
+    public static final String TOPIC_VISITS = "visits";
+
     public static StreamExecutionEnvironment getStatelessEnvironment(String[] args) {
         final StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
 
