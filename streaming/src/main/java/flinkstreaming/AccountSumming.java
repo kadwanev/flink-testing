@@ -1,7 +1,6 @@
 package flinkstreaming;
 
 import flinkstreaming.model.AccountMessage;
-import flinkstreaming.model.AccountMessageDeserializer;
 import flinkstreaming.util.SummingFunction;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.connector.kafka.source.KafkaSource;
@@ -22,7 +21,7 @@ public class AccountSumming {
                 .setBootstrapServers(Config.BOOTSTRAP_SERVERS)
                 .setGroupId("accountSumming")
                 .setTopics(Arrays.asList(Config.TOPIC_ACCOUNTS))
-                .setDeserializer(KafkaRecordDeserializationSchema.valueOnly(AccountMessageDeserializer.class))
+                .setDeserializer(KafkaRecordDeserializationSchema.valueOnly(AccountMessage.AccountMessageDeserializer.class))
                 .setStartingOffsets(OffsetsInitializer.earliest())
                 .build();
 /*

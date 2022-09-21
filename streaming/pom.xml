@@ -90,31 +90,6 @@
                     </execution>
 
                    <execution>
-                       <id>TransactionAverage</id>
-                       <phase>package</phase>
-                       <goals>
-                           <goal>single</goal>
-                       </goals>
-
-                       <configuration>
-                           <archive>
-                               <manifestEntries>
-                                   <program-class>
-                                       flinkstreaming.TransactionAverage
-                                   </program-class>
-                               </manifestEntries>
-                           </archive>
-
-                           <descriptorRefs>
-                               <descriptorRef>jar-with-dependencies</descriptorRef>
-                           </descriptorRefs>
-                           <finalName>${project.build.finalName}-TransactionAverage</finalName>
-                           <appendAssemblyId>false</appendAssemblyId>
-                       </configuration>
-
-                   </execution>
-
-                   <execution>
                        <id>VisitCounting</id>
                        <phase>package</phase>
                        <goals>

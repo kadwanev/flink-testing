@@ -1,7 +1,6 @@
 package flinkstreaming;
 
 import flinkstreaming.model.TransactionMessage;
-import flinkstreaming.model.TransactionMessageDeserializer;
 import flinkstreaming.util.AveragingFunction;
 import flinkstreaming.util.SummingFunction;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
@@ -10,6 +9,7 @@ import org.apache.flink.connector.kafka.source.enumerator.initializer.OffsetsIni
 import org.apache.flink.connector.kafka.source.reader.deserializer.KafkaRecordDeserializationSchema;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+import org.apache.kafka.clients.consumer.OffsetResetStrategy;
 
 import java.util.Arrays;
 
@@ -23,12 +23,14 @@ public class TransactionSumming {
                 .setBootstrapServers(Config.BOOTSTRAP_SERVERS)
                 .setGroupId("transactionSumming")
                 .setTopics(Arrays.asList(Config.TOPIC_TRANSACTIONS))
-                .setDeserializer(KafkaRecordDeserializationSchema.valueOnly(TransactionMessageDeserializer.class))
-                .setStartingOffsets(OffsetsInitializer.earliest())
+                .setDeserializer(KafkaRecordDeserializationSchema.valueOnly(TransactionMessage.TransactionMessageDeserializer.class))
+                .setStartingOffsets(OffsetsInitializer.committedOffsets(OffsetResetStrategy.EARLIEST))
                 .build();
 
         DataStreamSource<TransactionMessage> transactionsStream =  env.fromSource(
-                transactionsKafkaSource, WatermarkStrategy.noWatermarks(), "Transactions Stream");
+                transactionsKafkaSource,
+                WatermarkStrategy.forMonotonousTimestamps(),
+                "Transactions Stream");
 
         transactionsStream
                 .keyBy(am -> am.accountId)

@@ -1,9 +1,13 @@
 
+List Topics:
+
+./bin/kafka-topics.sh --bootstrap-server localhost:9092 --list
+
 Create Topics:
 
 ./bin/kafka-topics.sh --bootstrap-server localhost:9092 --create --topic accounts --partitions 2
 ./bin/kafka-topics.sh --bootstrap-server localhost:9092 --create --topic transactions --partitions 4
-./bin/kafka-topics.sh --bootstrap-server localhost:9092 --create --topic visits --partitions 5
+./bin/kafka-topics.sh --bootstrap-server localhost:9092 --create --topic visits --partitions 5 --config retention.ms=3600000
 
 Delete Topics:
 
