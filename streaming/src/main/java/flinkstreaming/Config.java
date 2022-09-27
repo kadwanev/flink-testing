@@ -7,6 +7,8 @@ import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 
 public class Config {
 
+    public static final String DB_LOCATION = "/Users/nkadwa/workspace/flink-testing/streaming/db";
+
     public static final String BOOTSTRAP_SERVERS = "localhost:9092";
 
     public static final String TOPIC_ACCOUNTS = "accounts";

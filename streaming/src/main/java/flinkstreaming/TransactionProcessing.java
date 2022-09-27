@@ -1,5 +1,6 @@
 package flinkstreaming;
 
+import flinkstreaming.db.SqliteAsyncAccountFunction;
 import flinkstreaming.model.TransactionMessage;
 import flinkstreaming.util.AveragingFunction;
 import flinkstreaming.util.SummingFunction;
@@ -7,13 +8,16 @@ import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.connector.kafka.source.KafkaSource;
 import org.apache.flink.connector.kafka.source.enumerator.initializer.OffsetsInitializer;
 import org.apache.flink.connector.kafka.source.reader.deserializer.KafkaRecordDeserializationSchema;
+import org.apache.flink.streaming.api.datastream.AsyncDataStream;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
+import org.apache.flink.streaming.api.datastream.KeyedStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.kafka.clients.consumer.OffsetResetStrategy;
 
 import java.util.Arrays;
+import java.util.concurrent.TimeUnit;
 
-public class TransactionSumming {
+public class TransactionProcessing {
 
     public static void main(String[] args) throws Exception {
 
@@ -32,21 +36,30 @@ public class TransactionSumming {
                 WatermarkStrategy.forMonotonousTimestamps(),
                 "Transactions Stream");
 
-        transactionsStream
-                .keyBy(am -> am.accountId)
+        KeyedStream<TransactionMessage,Integer> keyedTransactionStream = transactionsStream
+                .keyBy(am -> am.accountId);
+
+        keyedTransactionStream
                 .countWindow(Long.MAX_VALUE, 1)
                 .apply(new SummingFunction.Aggregate<>(tm -> tm.amount))
                 .map( i -> "Transaction Total: " + i)
+                .name("Transaction Total by Account")
                 .print();
 
-        transactionsStream
-                .keyBy(am -> am.accountId)
+        keyedTransactionStream
                 .countWindow(50, 1)
                 .apply(new AveragingFunction.Aggregate<>(tm -> tm.amount))
                 .map( i -> "Transaction Last 50 Average: " + i)
+                .name("Transaction Last 50 Average by Account")
                 .print();
 
-        env.execute("Transaction Summing");
+        // Use Async IO to query account and join with transaction
+
+        AsyncDataStream.unorderedWait(transactionsStream, new SqliteAsyncAccountFunction(),1000, TimeUnit.MILLISECONDS, 100)
+                .name("Transaction joined to Account")
+                .print();
+
+        env.execute("Transaction Processing");
     }
 
 }

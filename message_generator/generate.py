@@ -15,13 +15,13 @@ TOPICS = {
         'partitions': [
             {
                 'time': range(30,50), 
-                'type': 'randNumberPair',
-                'message': { 'first': range(400,410), 'second': range(5000,20000) }
+                'type': 'randNumberMessage',
+                'message': range(400,410)
             },
             {
                 'time': range(30,50),
-                'type': 'randNumberPair',
-                'message': { 'first': range(400,410), 'second': range(5000,20000) }
+                'type': 'randNumberMessage',
+                'message': range(400,410)
             }
         ]
     },
@@ -31,22 +31,22 @@ TOPICS = {
             {
                 'time': range(1,40),
                 'type': 'randNumberPair',
-                'message': { 'first': range(400,450), 'second': range(1,125) }
+                'message': { 'first': range(400,412), 'second': range(1,125) }
             },
             {
                 'time': range(1,40),
                 'type': 'randNumberPair',
-                'message': { 'first': range(400,450), 'second': range(1,125) }
+                'message': { 'first': range(400,412), 'second': range(1,125) }
             },
             {
                 'time': range(1,40),
                 'type': 'randNumberPair',
-                'message': { 'first': range(400,450), 'second': range(1,125) }
+                'message': { 'first': range(400,412), 'second': range(1,125) }
             },
             {
                 'time': range(1,40),
                 'type': 'randNumberPair',
-                'message': { 'first': range(400,450), 'second': range(1,125) }
+                'message': { 'first': range(400,412), 'second': range(1,125) }
             }
         ]
     },
@@ -89,17 +89,28 @@ def runGenerator(log, topicName, partitionIdx):
     
     def msgRandNumber(range):
         def g():
-            msg = random.randrange(range.start, range.stop)
-            return msg
+            return random.randrange(range.start, range.stop+1)
         return g
     def msgRandNumberPair(config):
+        firstG = msgRandNumber(config['first'])
+        secondG = msgRandNumber(config['second'])
         def g():
-            msg = str(random.randrange(config['first'].start, config['first'].stop)) + "," + \
-                  str(random.randrange(config['second'].start, config['second'].stop))
-            return msg
+            return f"{str(firstG())},{str(secondG())}"
+        return g
+    def msgRandMessage():
+        names=["We","I","They","He","She","They"]
+        verbs=["was", "is", "are", "were"]
+        nouns=["playing a game", "watching television", "talking", "dancing", "speaking", "showering"]
+        def g():
+            return f"{names[random.randint(0,len(names)-1)]} {verbs[random.randint(0,len(verbs)-1)]} {nouns[random.randint(0,len(nouns)-1)]}"
+        return g
+    def msgRandNumberMessage(config):
+        numG = msgRandNumber(config)
+        msgG = msgRandMessage()
+        def g():
+            return f"{numG()},{msgG()}"
         return g
 
-    header = str.format("%s(%d)" % (topicName, partitionIdx))
     topic = TOPICS[topicName]
     partition = topic['partitions'][partitionIdx]
     generator = None
@@ -107,14 +118,17 @@ def runGenerator(log, topicName, partitionIdx):
         generator = msgRandNumber(partition['message'])
     elif partition['type'] == 'randNumberPair':
         generator = msgRandNumberPair(partition['message'])
+    elif partition['type'] == 'randNumberMessage':
+        generator = msgRandNumberMessage(partition['message'])
     else:
         raise "unknown generator type: " + partition['type']
+    waitTimeG = msgRandNumber(partition['time'])
     while True:
-        waitTime = random.randint(partition['time'].start, partition['time'].stop)
-        print(str.format("%s: Waiting %d secs" % (header, waitTime)))
+        waitTime = waitTimeG()
+        print(f"\t{topicName}({partitionIdx}): Waiting {waitTime} secs")
         time.sleep(waitTime)
         value = f"{str(generator())},{datetime.utcnow().isoformat()[:-3]}Z"
-        print(str.format("\t%s: Generated %s" % (header, value)))
+        print(f"{topicName}({partitionIdx}): Generated {value}")
         producer.send(topic['name'], value=value, partition=partitionIdx)
         
         
@@ -123,7 +137,7 @@ if __name__ == '__main__':
     from multiprocessing import Process, Queue
 
     total_threads = sum([len(TOPICS[k]['partitions']) for k,v in TOPICS.items()])
-    print(str.format("Starting %d threads. (Enter x to exit)" % total_threads))
+    print(f"Starting {total_threads} threads. (Enter x to exit)")
 
     log = Queue()
     processes = []

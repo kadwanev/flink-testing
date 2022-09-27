@@ -10,8 +10,17 @@ import java.time.ZonedDateTime;
 public class AccountMessage implements Serializable {
 
     public int accountId;
-    public int balance;
+    public String message;
     public ZonedDateTime eventTime;
+
+    @Override
+    public String toString() {
+        return "AccountMessage{" +
+                "accountId=" + accountId +
+                ", message='" + message + '\'' +
+                ", eventTime=" + eventTime +
+                '}';
+    }
 
     public static class AccountMessageDeserializer implements Deserializer<AccountMessage> {
 
@@ -28,7 +37,7 @@ public class AccountMessage implements Serializable {
                 }
                 AccountMessage am = new AccountMessage();
                 am.accountId = Integer.parseInt(splits[0]);
-                am.balance = Integer.parseInt(splits[1]);
+                am.message = splits[1];
                 am.eventTime = ZonedDateTime.parse(splits[2]);
                 return am;
             } catch (UnsupportedEncodingException var4) {

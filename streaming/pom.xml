@@ -29,6 +29,18 @@
             <version>${flink.version}</version>
         </dependency>
 
+        <dependency>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>flink-queryable-state-client-java</artifactId>
+            <version>${flink.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.xerial</groupId>
+            <artifactId>sqlite-jdbc</artifactId>
+            <version>3.36.0.3</version>
+        </dependency>
+
     </dependencies>
 
     <build>
@@ -40,7 +52,7 @@
 
                <executions>
                     <execution>
-                        <id>AccountSumming</id>
+                        <id>AccountStoring</id>
                         <phase>package</phase>
                         <goals>
                             <goal>single</goal>
@@ -50,7 +62,7 @@
                             <archive>
                                 <manifestEntries>
                                     <program-class>
-                                        flinkstreaming.AccountSumming
+                                        flinkstreaming.AccountStoring
                                     </program-class>
                                 </manifestEntries>
                             </archive>
@@ -58,14 +70,14 @@
                             <descriptorRefs>
                                 <descriptorRef>jar-with-dependencies</descriptorRef>
                             </descriptorRefs>
-                            <finalName>${project.build.finalName}-AccountSumming</finalName>
+                            <finalName>${project.build.finalName}-AccountStoring</finalName>
                             <appendAssemblyId>false</appendAssemblyId>
                         </configuration>
 
                     </execution>
 
                     <execution>
-                        <id>TransactionSumming</id>
+                        <id>TransactionProcessing</id>
                         <phase>package</phase>
                         <goals>
                             <goal>single</goal>
@@ -75,7 +87,7 @@
                             <archive>
                                 <manifestEntries>
                                     <program-class>
-                                        flinkstreaming.TransactionSumming
+                                        flinkstreaming.TransactionProcessing
                                     </program-class>
                                 </manifestEntries>
                             </archive>
@@ -83,7 +95,7 @@
                             <descriptorRefs>
                                 <descriptorRef>jar-with-dependencies</descriptorRef>
                             </descriptorRefs>
-                            <finalName>${project.build.finalName}-TransactionSumming</finalName>
+                            <finalName>${project.build.finalName}-TransactionProcessing</finalName>
                             <appendAssemblyId>false</appendAssemblyId>
                         </configuration>
 
@@ -143,7 +155,7 @@
                             <archive>
                                 <manifestEntries>
                                     <program-class>
-                                        flinkstreaming.AccountSumming
+                                        flinkstreaming.AccountStoring
                                     </program-class>
                                 </manifestEntries>
                             </archive>
