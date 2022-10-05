@@ -51,6 +51,32 @@
                 <artifactId>maven-assembly-plugin</artifactId>
 
                <executions>
+
+                   <execution>
+                       <id>CustomerStoring</id>
+                       <phase>package</phase>
+                       <goals>
+                           <goal>single</goal>
+                       </goals>
+
+                       <configuration>
+                           <archive>
+                               <manifestEntries>
+                                   <program-class>
+                                       flinkstreaming.CustomerStoring
+                                   </program-class>
+                               </manifestEntries>
+                           </archive>
+
+                           <descriptorRefs>
+                               <descriptorRef>jar-with-dependencies</descriptorRef>
+                           </descriptorRefs>
+                           <finalName>${project.build.finalName}-CustomerStoring</finalName>
+                           <appendAssemblyId>false</appendAssemblyId>
+                       </configuration>
+
+                   </execution>
+
                     <execution>
                         <id>AccountStoring</id>
                         <phase>package</phase>

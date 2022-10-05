@@ -6,13 +6,11 @@ import flinkstreaming.util.AveragingFunction;
 import flinkstreaming.util.SummingFunction;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.connector.kafka.source.KafkaSource;
-import org.apache.flink.connector.kafka.source.enumerator.initializer.OffsetsInitializer;
 import org.apache.flink.connector.kafka.source.reader.deserializer.KafkaRecordDeserializationSchema;
 import org.apache.flink.streaming.api.datastream.AsyncDataStream;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.api.datastream.KeyedStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-import org.apache.kafka.clients.consumer.OffsetResetStrategy;
 
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
@@ -28,7 +26,7 @@ public class TransactionProcessing {
                 .setGroupId("transactionSumming")
                 .setTopics(Arrays.asList(Config.TOPIC_TRANSACTIONS))
                 .setDeserializer(KafkaRecordDeserializationSchema.valueOnly(TransactionMessage.TransactionMessageDeserializer.class))
-                .setStartingOffsets(OffsetsInitializer.committedOffsets(OffsetResetStrategy.EARLIEST))
+//                .setStartingOffsets(OffsetsInitializer.committedOffsets(OffsetResetStrategy.EARLIEST))
                 .build();
 
         DataStreamSource<TransactionMessage> transactionsStream =  env.fromSource(
@@ -41,16 +39,18 @@ public class TransactionProcessing {
 
         keyedTransactionStream
                 .countWindow(Long.MAX_VALUE, 1)
-                .apply(new SummingFunction.Aggregate<>(tm -> tm.amount))
+                .process(new SummingFunction.Aggregate<>(tm -> tm.amount))
                 .map( i -> "Transaction Total: " + i)
                 .name("Transaction Total by Account")
+                .uid("transaction-total-by-account")
                 .print();
 
         keyedTransactionStream
                 .countWindow(50, 1)
-                .apply(new AveragingFunction.Aggregate<>(tm -> tm.amount))
+                .process(new AveragingFunction.Aggregate<>(tm -> tm.amount))
                 .map( i -> "Transaction Last 50 Average: " + i)
                 .name("Transaction Last 50 Average by Account")
+                .uid("transaction-50-average-by-account")
                 .print();
 
         // Use Async IO to query account and join with transaction

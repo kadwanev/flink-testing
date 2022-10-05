@@ -1,6 +1,6 @@
 package flinkstreaming;
 
-import flinkstreaming.db.SqliteSinkFunction;
+import flinkstreaming.db.SqliteStoringSinkFunctions;
 import flinkstreaming.model.AccountMessage;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.connector.kafka.source.KafkaSource;
@@ -15,7 +15,7 @@ public class AccountStoring {
 
     public static void main(String[] args) throws Exception {
 
-        final StreamExecutionEnvironment env = Config.getStatefulEnvironment(args);
+        final StreamExecutionEnvironment env = Config.getStatelessEnvironment(args);
 
         KafkaSource<AccountMessage> accountsKafkaSource = KafkaSource.<AccountMessage>builder()
                 .setBootstrapServers(Config.BOOTSTRAP_SERVERS)
@@ -30,7 +30,7 @@ public class AccountStoring {
 
         // Store to Sqlite
         accountsStream
-                .addSink(new SqliteSinkFunction<>())
+                .addSink(new SqliteStoringSinkFunctions.AccountStoring())
                 .name("Sqlite Sink");
 
         // Store to queryable stream state

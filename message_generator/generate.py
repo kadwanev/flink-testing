@@ -10,23 +10,43 @@ BROKER_LIST='localhost:9092'
 # Topics to generate messages on
 # 	
 TOPICS = {
-    'ACCT': {
-        'name': 'accounts',
+    'cust': {
+        'topicName': 'customers',
         'partitions': [
             {
-                'time': range(30,50), 
-                'type': 'randNumberMessage',
-                'message': range(400,410)
+                'time': range(30,50),
+                'type': 'randCustomer',
+                'message': { 'customer': range(10,20), 'account': range(400,410) }
             },
             {
                 'time': range(30,50),
-                'type': 'randNumberMessage',
-                'message': range(400,410)
+                'type': 'randCustomer',
+                'message': { 'customer': range(10,20), 'account': range(400,410) }
             }
         ]
     },
-    'TRAN': {
-        'name': 'transactions',
+    'acct': {
+        'topicName': 'accounts',
+        'partitions': [
+            {
+                'time': range(30,50),
+                'type': 'randAccount',
+                'message': { 'customer': range(10,20), 'account': range(400,410) }
+            },
+            {
+                'time': range(30,50),
+                'type': 'randAccount',
+                'message': { 'customer': range(10,20), 'account': range(400,410) }
+            },
+            {
+                'time': range(30,50),
+                'type': 'randAccount',
+                'message': { 'customer': range(10,20), 'account': range(400,410) }
+            }
+        ]
+    },
+    'tran': {
+        'topicName': 'transactions',
         'partitions': [
             {
                 'time': range(1,40),
@@ -50,8 +70,8 @@ TOPICS = {
             }
         ]
     },
-    'VISIT': {
-        'name': 'visits',
+    'visit': {
+        'topicName': 'visits',
         'partitions': [
             {
                 'time': range(1,10),
@@ -104,11 +124,37 @@ def runGenerator(log, topicName, partitionIdx):
         def g():
             return f"{names[random.randint(0,len(names)-1)]} {verbs[random.randint(0,len(verbs)-1)]} {nouns[random.randint(0,len(nouns)-1)]}"
         return g
-    def msgRandNumberMessage(config):
-        numG = msgRandNumber(config)
-        msgG = msgRandMessage()
+    def msgRandEmail():
+        names=["joe", "linda", "mary", "michael", "dennis", "steve", "alex", "pat"]
+        domains=["gmail.com", "outlook.com", "icloud.com", "yahoo.com", "aol.com"]
         def g():
-            return f"{numG()},{msgG()}"
+            return f"{names[random.randint(0,len(names)-1)]}@{domains[random.randint(0,len(domains)-1)]}"
+        return g
+    def msgRandBoolean():
+        def g():
+            return random.getrandbits(1) == 0
+        return g
+    def msgRandState():
+        states=["AL","AK","AZ","AR","CA","CO","CT","DE","FL","GA","HI","ID","IL","IN","IA","KS","KY","LA","ME","MD",
+                "MA","MI","MN","MS","MO","MT","NE","NV","NH","NJ","NM","NY","NC","ND","OH","OK","OR","PA","RI","SC",
+                "SD","TN","TX","UT","VT","VA","WA","WV","WI","WY"]
+        def g():
+            return states[random.randint(0,len(states)-1)]
+        return g
+    def msgRandAccount(config):
+        accountG = msgRandNumber(config['account'])
+        customerG = msgRandNumber(config['customer'])
+        messageG = msgRandMessage()
+        def g():
+            return f"{accountG()},{customerG()},{messageG()}"
+        return g
+    def msgRandCustomer(config):
+        customerG = msgRandNumber(config['customer'])
+        emailG = msgRandEmail()
+        prefG = msgRandBoolean()
+        stateG = msgRandState()
+        def g():
+            return f"{customerG()},{emailG()},{prefG()},{stateG()}"
         return g
 
     topic = TOPICS[topicName]
@@ -118,8 +164,10 @@ def runGenerator(log, topicName, partitionIdx):
         generator = msgRandNumber(partition['message'])
     elif partition['type'] == 'randNumberPair':
         generator = msgRandNumberPair(partition['message'])
-    elif partition['type'] == 'randNumberMessage':
-        generator = msgRandNumberMessage(partition['message'])
+    elif partition['type'] == 'randAccount':
+        generator = msgRandAccount(partition['message'])
+    elif partition['type'] == 'randCustomer':
+        generator = msgRandCustomer(partition['message'])
     else:
         raise "unknown generator type: " + partition['type']
     waitTimeG = msgRandNumber(partition['time'])
@@ -129,7 +177,7 @@ def runGenerator(log, topicName, partitionIdx):
         time.sleep(waitTime)
         value = f"{str(generator())},{datetime.utcnow().isoformat()[:-3]}Z"
         print(f"{topicName}({partitionIdx}): Generated {value}")
-        producer.send(topic['name'], value=value, partition=partitionIdx)
+        producer.send(topic['topicName'], value=value, partition=partitionIdx)
         
         
 if __name__ == '__main__':

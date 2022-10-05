@@ -10,6 +10,7 @@ import java.time.ZonedDateTime;
 public class AccountMessage implements Serializable {
 
     public int accountId;
+    public int customerId;
     public String message;
     public ZonedDateTime eventTime;
 
@@ -17,6 +18,7 @@ public class AccountMessage implements Serializable {
     public String toString() {
         return "AccountMessage{" +
                 "accountId=" + accountId +
+                ", customerId='" + customerId + '\'' +
                 ", message='" + message + '\'' +
                 ", eventTime=" + eventTime +
                 '}';
@@ -32,13 +34,14 @@ public class AccountMessage implements Serializable {
                 String messageStr = data == null ? null : new String(data, this.ENCODING);
 
                 String[] splits = messageStr.split(",");
-                if (splits.length != 3) {
+                if (splits.length != 4) {
                     throw new SerializationException("Invalid account message " + messageStr);
                 }
                 AccountMessage am = new AccountMessage();
                 am.accountId = Integer.parseInt(splits[0]);
-                am.message = splits[1];
-                am.eventTime = ZonedDateTime.parse(splits[2]);
+                am.customerId = Integer.parseInt(splits[1]);
+                am.message = splits[2];
+                am.eventTime = ZonedDateTime.parse(splits[3]);
                 return am;
             } catch (UnsupportedEncodingException var4) {
                 throw new SerializationException("Error when deserializing byte[] to string due to unsupported encoding " + this.ENCODING);

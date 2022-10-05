@@ -36,14 +36,14 @@ public class VisitCounting {
         visitsStream
                 .map(vm -> vm.count)
                 .windowAll(TumblingProcessingTimeWindows.of(Time.seconds(30)))
-                .apply(new SummingFunction.AllAggregate<>())
+                .process(new SummingFunction.AllAggregate<>())
                 .map(i -> "Visits Total (30secs): " + i.toString())
                 .print();
 
         visitsStream
                 .map(vm -> vm.count)
                 .windowAll(TumblingProcessingTimeWindows.of(Time.seconds(30)))
-                .apply(new AveragingFunction.AllAggregate<>())
+                .process(new AveragingFunction.AllAggregate<>())
                 .map(i -> "Visits Average (30secs): " + i.toString())
                 .print();
 

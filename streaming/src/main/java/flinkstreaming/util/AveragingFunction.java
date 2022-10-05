@@ -2,14 +2,14 @@ package flinkstreaming.util;
 
 import flinkstreaming.aggregate.AllNumAggregate;
 import flinkstreaming.aggregate.NumAggregate;
-import org.apache.flink.streaming.api.functions.windowing.AllWindowFunction;
-import org.apache.flink.streaming.api.functions.windowing.WindowFunction;
+import org.apache.flink.streaming.api.functions.windowing.ProcessAllWindowFunction;
+import org.apache.flink.streaming.api.functions.windowing.ProcessWindowFunction;
 import org.apache.flink.streaming.api.windowing.windows.Window;
 import org.apache.flink.util.Collector;
 
 public class AveragingFunction<T> {
 
-    public static final class AllAggregate<T, W extends Window> implements AllWindowFunction<T, AllNumAggregate<Double,Integer>, W>
+    public static final class AllAggregate<T, W extends Window> extends ProcessAllWindowFunction<T, AllNumAggregate<Double,Integer>, W>
     {
         private SerializableFunction<T,Integer> numFunc = null;
 
@@ -22,7 +22,7 @@ public class AveragingFunction<T> {
         }
 
         @Override
-        public void apply(W globalWindow, Iterable<T> values, Collector<AllNumAggregate<Double,Integer>> out) throws Exception {
+        public void process(Context context, Iterable<T> values, Collector<AllNumAggregate<Double,Integer>> out) throws Exception {
             AllNumAggregate<Double,Integer> agg = new AllNumAggregate<>();
             long sum = 0l;
             int count = 0;
@@ -37,7 +37,7 @@ public class AveragingFunction<T> {
         }
     }
 
-    public static final class Aggregate<T, W extends Window> implements WindowFunction<T, NumAggregate<Integer,Double,Integer>, Integer, W> {
+    public static final class Aggregate<T, W extends Window> extends ProcessWindowFunction<T, NumAggregate<Integer,Double,Integer>, Integer, W> {
         private SerializableFunction<T,Integer> numFunc = null;
 
         public <T extends Integer> Aggregate() {
@@ -49,7 +49,7 @@ public class AveragingFunction<T> {
         }
 
         @Override
-        public void apply(Integer key, W window, Iterable<T> values, Collector<NumAggregate<Integer,Double,Integer>> out) throws Exception {
+        public void process(Integer key, Context context, Iterable<T> values, Collector<NumAggregate<Integer,Double,Integer>> out) throws Exception {
             NumAggregate<Integer,Double,Integer> agg = new NumAggregate<>();
             agg.key = key;
             long sum = 0l;
