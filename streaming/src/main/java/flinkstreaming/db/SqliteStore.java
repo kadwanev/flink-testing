@@ -37,6 +37,7 @@ public class SqliteStore {
                 createCustomerTable();
                 createAccountTable();
                 createTransactionTable();
+                createCustomerValueQueryTable();
             }
         } catch (SQLException e) {
             throw new RuntimeException("Error initializing sqlite", e);
@@ -232,5 +233,37 @@ public class SqliteStore {
         tm.eventTime = ZonedDateTime.parse(rs.getString(3));
         return tm;
     }
+
+    private static final String CUSTOMER_VALUE_QUERY_CREATE_STMT = String.format(
+            "CREATE TABLE IF NOT EXISTS customerValueQuery ( " +
+                    "  customerId integer PRIMARY KEY, " +
+                    "  value text NOT NULL, " +
+                    "  updateSource text NOT NULL, " +
+                    "  lastUpdated text NOT NULL " +
+                    "); "
+    );
+    private void createCustomerValueQueryTable() throws SQLException {
+        Statement stmt = this.conn.createStatement();
+        stmt.execute(CUSTOMER_VALUE_QUERY_CREATE_STMT);
+        stmt.close();
+    }
+
+    private static final String CUSTOMER_VALUE_QUERY_INSERT_STMT = String.format(
+            "INSERT INTO customerValueQuery (customerId,value,updateSource,lastUpdated) VALUES (?,?,?,?) " +
+                    "  ON CONFLICT(customerId) DO UPDATE SET " +
+                    "    value=excluded.value," +
+                    "    updateSource=excluded.updateSource," +
+                    "    lastUpdated=excluded.lastUpdated; "
+    );
+    public void insertCustomerValueQueryTable(int customerId, String value, String updateSource, ZonedDateTime lastUpdated) throws SQLException {
+        PreparedStatement stmt = this.conn.prepareStatement(CUSTOMER_VALUE_QUERY_INSERT_STMT);
+        stmt.setInt(1, customerId);
+        stmt.setString(2, value);
+        stmt.setString(3, updateSource);
+        stmt.setString(4, lastUpdated.format(DateTimeFormatter.ISO_INSTANT));
+        stmt.executeUpdate();
+        stmt.close();
+    }
+
 
 }
