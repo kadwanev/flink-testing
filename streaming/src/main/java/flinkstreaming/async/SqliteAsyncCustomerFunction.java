@@ -1,4 +1,4 @@
-package flinkstreaming.db;
+package flinkstreaming.async;
 
 public class SqliteAsyncCustomerFunction {
 }

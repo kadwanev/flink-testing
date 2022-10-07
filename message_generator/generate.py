@@ -73,31 +73,31 @@ TOPICS = {
     'visit': {
         'topicName': 'visits',
         'partitions': [
-            {
-                'time': range(1,10),
-                'type': 'randNumber',
-                'message': range(1,1000)
-            },
-            {
-                'time': range(1,10),
-                'type': 'randNumber',
-                'message': range(1,1000)
-            },
-            {
-                'time': range(1,10),
-                'type': 'randNumber',
-                'message': range(1,1000)
-            },
-            {
-                'time': range(1,10),
-                'type': 'randNumber',
-                'message': range(1,1000)
-            },
-            {
-                'time': range(1,10),
-                'type': 'randNumber',
-                'message': range(1,1000)
-            }
+            # {
+            #     'time': range(1,10),
+            #     'type': 'randNumber',
+            #     'message': range(1,1000)
+            # },
+            # {
+            #     'time': range(1,10),
+            #     'type': 'randNumber',
+            #     'message': range(1,1000)
+            # },
+            # {
+            #     'time': range(1,10),
+            #     'type': 'randNumber',
+            #     'message': range(1,1000)
+            # },
+            # {
+            #     'time': range(1,10),
+            #     'type': 'randNumber',
+            #     'message': range(1,1000)
+            # },
+            # {
+            #     'time': range(1,10),
+            #     'type': 'randNumber',
+            #     'message': range(1,1000)
+            # }
         ]
     }
 }

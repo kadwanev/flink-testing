@@ -1,9 +1,22 @@
 package flinkstreaming;
 
+import flinkstreaming.model.AccountMessage;
+import flinkstreaming.model.CustomerMessage;
+import flinkstreaming.model.TransactionMessage;
+import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.java.utils.ParameterTool;
+import org.apache.flink.connector.kafka.source.KafkaSource;
+import org.apache.flink.connector.kafka.source.enumerator.initializer.OffsetsInitializer;
+import org.apache.flink.connector.kafka.source.reader.deserializer.KafkaRecordDeserializationSchema;
 import org.apache.flink.streaming.api.CheckpointingMode;
+import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.api.environment.CheckpointConfig;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+import org.apache.kafka.clients.consumer.OffsetResetStrategy;
+
+import java.util.Arrays;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class Config {
 
@@ -19,6 +32,8 @@ public class Config {
     public static final String TOPIC_TRANSACTIONS_TOTALS = "transactionsTotal";
 
     public static final String TOPIC_VISITS = "visits";
+
+    public static final ExecutorService EXECUTOR_SERVICE = Executors.newFixedThreadPool(200);
 
     public static StreamExecutionEnvironment getStatelessEnvironment(String[] args) {
         final StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
@@ -46,6 +61,57 @@ public class Config {
         env.getCheckpointConfig().enableUnalignedCheckpoints();
 
         return env;
+    }
+
+    public static DataStreamSource<CustomerMessage> getCustomersStream(String consumerGroupId, StreamExecutionEnvironment env) {
+        KafkaSource<CustomerMessage> customersKafkaSource = KafkaSource.<CustomerMessage>builder()
+                .setBootstrapServers(Config.BOOTSTRAP_SERVERS)
+                .setGroupId(consumerGroupId)
+                .setTopics(Arrays.asList(Config.TOPIC_CUSTOMERS))
+                .setDeserializer(KafkaRecordDeserializationSchema.valueOnly(CustomerMessage.CustomerMessageDeserializer.class))
+                .setStartingOffsets(OffsetsInitializer.committedOffsets(OffsetResetStrategy.EARLIEST))
+                .build();
+
+        DataStreamSource<CustomerMessage> customersSourceStream = env.fromSource(
+                customersKafkaSource,
+                WatermarkStrategy.forMonotonousTimestamps(),
+                "Customers Stream");
+
+        return customersSourceStream;
+    }
+
+    public static DataStreamSource<AccountMessage> getAccountsStream(String consumerGroupId, StreamExecutionEnvironment env) {
+        KafkaSource<AccountMessage> accountsKafkaSource = KafkaSource.<AccountMessage>builder()
+                .setBootstrapServers(Config.BOOTSTRAP_SERVERS)
+                .setGroupId(consumerGroupId)
+                .setTopics(Arrays.asList(Config.TOPIC_ACCOUNTS))
+                .setDeserializer(KafkaRecordDeserializationSchema.valueOnly(AccountMessage.AccountMessageDeserializer.class))
+                .setStartingOffsets(OffsetsInitializer.committedOffsets(OffsetResetStrategy.EARLIEST))
+                .build();
+
+        DataStreamSource<AccountMessage> accountsSourceStream = env.fromSource(
+                accountsKafkaSource,
+                WatermarkStrategy.forMonotonousTimestamps(),
+                "Accounts Stream");
+
+        return accountsSourceStream;
+    }
+
+    public static DataStreamSource<TransactionMessage> getTransactionsStream(String consumerGroupId, StreamExecutionEnvironment env) {
+        KafkaSource<TransactionMessage> transactionsKafkaSource = KafkaSource.<TransactionMessage>builder()
+                .setBootstrapServers(Config.BOOTSTRAP_SERVERS)
+                .setGroupId(consumerGroupId)
+                .setTopics(Arrays.asList(Config.TOPIC_TRANSACTIONS))
+                .setDeserializer(KafkaRecordDeserializationSchema.valueOnly(TransactionMessage.TransactionMessageDeserializer.class))
+                .setStartingOffsets(OffsetsInitializer.committedOffsets(OffsetResetStrategy.EARLIEST))
+                .build();
+
+        DataStreamSource<TransactionMessage> transactionsSourceStream = env.fromSource(
+                transactionsKafkaSource,
+                WatermarkStrategy.forMonotonousTimestamps(),
+                "Transactions Stream");
+
+        return transactionsSourceStream;
     }
 
 }

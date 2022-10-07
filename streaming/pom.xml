@@ -102,6 +102,31 @@
 
                     </execution>
 
+                   <execution>
+                       <id>TransactionStoring</id>
+                       <phase>package</phase>
+                       <goals>
+                           <goal>single</goal>
+                       </goals>
+
+                       <configuration>
+                           <archive>
+                               <manifestEntries>
+                                   <program-class>
+                                       flinkstreaming.TransactionStoring
+                                   </program-class>
+                               </manifestEntries>
+                           </archive>
+
+                           <descriptorRefs>
+                               <descriptorRef>jar-with-dependencies</descriptorRef>
+                           </descriptorRefs>
+                           <finalName>${project.build.finalName}-TransactionStoring</finalName>
+                           <appendAssemblyId>false</appendAssemblyId>
+                       </configuration>
+
+                   </execution>
+
                     <execution>
                         <id>TransactionProcessing</id>
                         <phase>package</phase>
@@ -151,6 +176,32 @@
                        </configuration>
 
                    </execution>
+
+                   <execution>
+                       <id>QueryJoinCustomerValuable</id>
+                       <phase>package</phase>
+                       <goals>
+                           <goal>single</goal>
+                       </goals>
+
+                       <configuration>
+                           <archive>
+                               <manifestEntries>
+                                   <program-class>
+                                       flinkstreaming.QueryJoinCustomerValuable
+                                   </program-class>
+                               </manifestEntries>
+                           </archive>
+
+                           <descriptorRefs>
+                               <descriptorRef>jar-with-dependencies</descriptorRef>
+                           </descriptorRefs>
+                           <finalName>${project.build.finalName}-QueryJoinCustomerValuable</finalName>
+                           <appendAssemblyId>false</appendAssemblyId>
+                       </configuration>
+
+                   </execution>
+
 
                </executions>
 

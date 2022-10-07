@@ -1,6 +1,6 @@
 package flinkstreaming;
 
-import flinkstreaming.db.SqliteAsyncAccountFunction;
+import flinkstreaming.async.AsyncAccountLoad;
 import flinkstreaming.model.TransactionMessage;
 import flinkstreaming.util.AveragingFunction;
 import flinkstreaming.util.SummingFunction;
@@ -55,7 +55,7 @@ public class TransactionProcessing {
 
         // Use Async IO to query account and join with transaction
 
-        AsyncDataStream.unorderedWait(transactionsStream, new SqliteAsyncAccountFunction(),1000, TimeUnit.MILLISECONDS, 100)
+        AsyncDataStream.unorderedWait(transactionsStream, new AsyncAccountLoad(),1000, TimeUnit.MILLISECONDS, 100)
                 .name("Transaction joined to Account")
                 .print();
 

@@ -1,5 +1,6 @@
-package flinkstreaming.db;
+package flinkstreaming.async;
 
+import flinkstreaming.db.SqliteStore;
 import flinkstreaming.model.AccountMessage;
 import flinkstreaming.model.TransactionJAccount;
 import flinkstreaming.model.TransactionMessage;
@@ -12,13 +13,13 @@ import java.util.Optional;
 import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 
-public class SqliteAsyncAccountFunction extends RichAsyncFunction<TransactionMessage, TransactionJAccount> {
+public class AsyncAccountLoad extends RichAsyncFunction<TransactionMessage, TransactionJAccount> {
 
 
     @Override
     public void open(Configuration parameters) throws Exception {
-        SqliteStore.getInstance(); // Initialize instance giving thread safety
         super.open(parameters);
+        SqliteStore.getInstance(); // Initialize instance giving thread safety
     }
 
     @Override

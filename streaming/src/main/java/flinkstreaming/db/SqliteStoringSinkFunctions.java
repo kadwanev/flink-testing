@@ -2,6 +2,7 @@ package flinkstreaming.db;
 
 import flinkstreaming.model.AccountMessage;
 import flinkstreaming.model.CustomerMessage;
+import flinkstreaming.model.TransactionMessage;
 import org.apache.flink.streaming.api.functions.sink.RichSinkFunction;
 
 public class SqliteStoringSinkFunctions {
@@ -17,6 +18,13 @@ public class SqliteStoringSinkFunctions {
         @Override
         public void invoke(CustomerMessage message, Context context) throws Exception {
             SqliteStore.getInstance().insertCustomer(message);
+        }
+    }
+
+    public static class TransactionStoring extends RichSinkFunction<TransactionMessage> {
+        @Override
+        public void invoke(TransactionMessage message, Context context) throws Exception {
+            SqliteStore.getInstance().insertTransaction(message);
         }
     }
 
