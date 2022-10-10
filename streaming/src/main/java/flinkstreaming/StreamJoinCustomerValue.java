@@ -4,12 +4,13 @@ import flinkstreaming.model.AccountMessage;
 import flinkstreaming.model.CustomerMessage;
 import flinkstreaming.model.TransactionMessage;
 import org.apache.flink.api.common.functions.AggregateFunction;
+import org.apache.flink.api.common.functions.JoinFunction;
 import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.co.ProcessJoinFunction;
-import org.apache.flink.streaming.api.windowing.assigners.ProcessingTimeSessionWindows;
+import org.apache.flink.streaming.api.windowing.assigners.SlidingProcessingTimeWindows;
 import org.apache.flink.streaming.api.windowing.time.Time;
 import org.apache.flink.table.api.TableEnvironment;
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
@@ -39,13 +40,17 @@ public class StreamJoinCustomerValue {
         DataStream<Tuple2<AccountMessage,TransactionMessage>> accountLatestTransactionStream =
                 transactionStreamSource.keyBy(tm -> tm.accountId)
                     .reduce((prev,curr) -> curr)
-                    .keyBy(tm -> tm.accountId)
-                    .intervalJoin(accountsStreamSource.keyBy(am -> am.accountId))
-                    .between(Time.days(365), Time.days(365))
-                    .process(new PassThroughFlipProcessFunction<>())
-                    .uid("account-latest-transaction-stream");
+                    .join(accountsStreamSource)
+                    .where(tm -> tm.accountId)
+                    .equalTo(am -> am.accountId)
+                    .window(SlidingProcessingTimeWindows.of(Time.minutes(15), Time.milliseconds(1)))
+                    .apply(new PassThroughFlipJoinFunction<>());
+//                    .intervalJoin(accountsStreamSource.keyBy(am -> am.accountId))
+//                    .between(Time.days(365), Time.days(365))
+//                    .process(new PassThroughFlipProcessFunction<>())
+//                    .uid("account-latest-transaction-stream");
         accountLatestTransactionStream.print();
-
+/*
         DataStream<List<Tuple2<AccountMessage,TransactionMessage>>> listAccountsLatestTransactionStream =
                 accountLatestTransactionStream
                     .keyBy(i -> i.f0.customerId)
@@ -56,13 +61,18 @@ public class StreamJoinCustomerValue {
 
         DataStream<Tuple2<CustomerMessage,List<Tuple2<AccountMessage,TransactionMessage>>>> customerAccountsTransactionStream =
                 listAccountsLatestTransactionStream
-                    .keyBy(i -> i.get(0).f0.customerId)
-                    .intervalJoin(customersStreamSource.keyBy(cm -> cm.customerId))
-                    .between(Time.days(365), Time.days(365))
-                    .process(new PassThroughFlipProcessFunction<>())
-                    .uid("customer-account-latest-transaction-stream");
+                        .join(customersStreamSource)
+                        .where(actm -> actm.get(0).f0.customerId)
+                        .equalTo(cm -> cm.customerId)
+                        .window(SlidingProcessingTimeWindows.of(Time.days(365), Time.milliseconds(1)))
+                        .apply(new PassThroughFlipJoinFunction<>());
+//                    .keyBy(i -> i.get(0).f0.customerId)
+//                    .intervalJoin(customersStreamSource.keyBy(cm -> cm.customerId))
+//                    .between(Time.days(365), Time.days(365))
+//                    .process(new PassThroughFlipProcessFunction<>())
+//                    .uid("customer-account-latest-transaction-stream");
         customerAccountsTransactionStream.print();
-
+*/
 
 
         env.execute("Calculate Customer Valuable via Stream Joining");
@@ -122,6 +132,13 @@ public class StreamJoinCustomerValue {
         @Override
         public void processElement(IN1 lhs, IN2 rhs, Context context, Collector<Tuple2<IN2, IN1>> out) throws Exception {
             out.collect(new Tuple2<>(rhs,lhs));
+        }
+    }
+
+    public static class PassThroughFlipJoinFunction<IN1,IN2> implements JoinFunction<IN1,IN2,Tuple2<IN2,IN1>> {
+        @Override
+        public Tuple2<IN2, IN1> join(IN1 in1, IN2 in2) throws Exception {
+            return new Tuple2<>(in2,in1);
         }
     }
 
