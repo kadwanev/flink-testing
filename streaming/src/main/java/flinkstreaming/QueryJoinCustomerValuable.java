@@ -38,12 +38,14 @@ public class QueryJoinCustomerValuable {
         final StreamExecutionEnvironment env = Config.getStatefulEnvironment(args);
         env.setParallelism(3);
 
+        String consumerGroupId = "queryJoinCustomerValuable";
+
         DataStreamSource<CustomerMessage> customersStreamSource =
-                Config.getCustomersStream("queryJoinCustomerValuable", env);
+                Config.getCustomersStream(consumerGroupId, env);
         DataStreamSource<AccountMessage> accountsStreamSource =
-                Config.getAccountsStream("queryJoinCustomerValuable", env);
+                Config.getAccountsStream(consumerGroupId, env);
         DataStreamSource<TransactionMessage> transactionStreamSource =
-                Config.getTransactionsStream("queryJoinCustomerValuable", env);
+                Config.getTransactionsStream(consumerGroupId, env);
 
 
         AsyncDataStream.unorderedWait(customersStreamSource, new AsyncCustomerLoadCustomerAccountLastTransaction(), 10, TimeUnit.SECONDS, 2)

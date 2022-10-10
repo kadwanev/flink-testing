@@ -25,6 +25,13 @@
 
         <dependency>
             <groupId>org.apache.flink</groupId>
+            <artifactId>flink-table-api-java-bridge_2.12</artifactId>
+            <version>${flink.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.flink</groupId>
             <artifactId>flink-connector-kafka_2.12</artifactId>
             <version>${flink.version}</version>
         </dependency>
@@ -74,7 +81,6 @@
                            <finalName>${project.build.finalName}-CustomerStoring</finalName>
                            <appendAssemblyId>false</appendAssemblyId>
                        </configuration>
-
                    </execution>
 
                     <execution>
@@ -99,7 +105,6 @@
                             <finalName>${project.build.finalName}-AccountStoring</finalName>
                             <appendAssemblyId>false</appendAssemblyId>
                         </configuration>
-
                     </execution>
 
                    <execution>
@@ -124,7 +129,6 @@
                            <finalName>${project.build.finalName}-TransactionStoring</finalName>
                            <appendAssemblyId>false</appendAssemblyId>
                        </configuration>
-
                    </execution>
 
                     <execution>
@@ -149,7 +153,6 @@
                             <finalName>${project.build.finalName}-TransactionProcessing</finalName>
                             <appendAssemblyId>false</appendAssemblyId>
                         </configuration>
-
                     </execution>
 
                    <execution>
@@ -174,7 +177,6 @@
                            <finalName>${project.build.finalName}-VisitCounting</finalName>
                            <appendAssemblyId>false</appendAssemblyId>
                        </configuration>
-
                    </execution>
 
                    <execution>
@@ -199,7 +201,30 @@
                            <finalName>${project.build.finalName}-QueryJoinCustomerValuable</finalName>
                            <appendAssemblyId>false</appendAssemblyId>
                        </configuration>
+                   </execution>
 
+                   <execution>
+                       <id>StreamJoinCustomerValue</id>
+                       <phase>package</phase>
+                       <goals>
+                           <goal>single</goal>
+                       </goals>
+
+                       <configuration>
+                           <archive>
+                               <manifestEntries>
+                                   <program-class>
+                                       flinkstreaming.StreamJoinCustomerValue
+                                   </program-class>
+                               </manifestEntries>
+                           </archive>
+
+                           <descriptorRefs>
+                               <descriptorRef>jar-with-dependencies</descriptorRef>
+                           </descriptorRefs>
+                           <finalName>${project.build.finalName}-StreamJoinCustomerValue</finalName>
+                           <appendAssemblyId>false</appendAssemblyId>
+                       </configuration>
                    </execution>
 
 
