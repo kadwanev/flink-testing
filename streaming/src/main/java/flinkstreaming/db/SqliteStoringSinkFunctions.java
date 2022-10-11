@@ -6,7 +6,7 @@ import flinkstreaming.model.TransactionMessage;
 import org.apache.flink.api.java.tuple.Tuple4;
 import org.apache.flink.streaming.api.functions.sink.RichSinkFunction;
 
-import java.time.ZonedDateTime;
+import java.time.LocalDateTime;
 
 public class SqliteStoringSinkFunctions {
 
@@ -31,9 +31,9 @@ public class SqliteStoringSinkFunctions {
         }
     }
 
-    public static class CustomerValueQueryStoring extends RichSinkFunction<Tuple4<CustomerMessage, String, String, ZonedDateTime>> {
+    public static class CustomerValueQueryStoring extends RichSinkFunction<Tuple4<CustomerMessage, String, String, LocalDateTime>> {
         @Override
-        public void invoke(Tuple4<CustomerMessage, String, String, ZonedDateTime> value, Context context) throws Exception {
+        public void invoke(Tuple4<CustomerMessage, String, String, LocalDateTime> value, Context context) throws Exception {
             SqliteStore.getInstance().insertCustomerValueQueryTable(value.f0.customerId, value.f1, value.f2, value.f3);
         }
     }

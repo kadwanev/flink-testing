@@ -1,17 +1,21 @@
 package flinkstreaming.model;
 
+import org.apache.flink.table.api.DataTypes;
+import org.apache.flink.table.api.Schema;
 import org.apache.kafka.common.errors.SerializationException;
 import org.apache.kafka.common.serialization.Deserializer;
 
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 
 public class TransactionMessage implements Serializable {
 
     public int accountId;
     public int amount;
-    public ZonedDateTime eventTime;
+    public LocalDateTime eventTime;
 
     @Override
     public String toString() {
@@ -19,8 +23,16 @@ public class TransactionMessage implements Serializable {
                 "accountId=" + accountId +
                 ", amount=" + amount +
                 ", eventTime=" + eventTime +
-                ", eventTimeMillis=" + eventTime.toInstant().toEpochMilli() +
+                ", eventTimeMillis=" + eventTime.toInstant(ZoneOffset.UTC).toEpochMilli() +
                 '}';
+    }
+
+    public static Schema tableSchema() {
+        return Schema.newBuilder()
+                .column("accountId", DataTypes.INT().notNull())
+                .column("amount", DataTypes.INT().notNull())
+                .column("eventTime", DataTypes.TIMESTAMP().notNull())
+                .build();
     }
 
     public static class TransactionMessageDeserializer implements Deserializer<TransactionMessage> {
@@ -39,7 +51,7 @@ public class TransactionMessage implements Serializable {
                 TransactionMessage tm = new TransactionMessage();
                 tm.accountId = Integer.parseInt(splits[0]);
                 tm.amount = Integer.parseInt(splits[1]);
-                tm.eventTime = ZonedDateTime.parse(splits[2]);
+                tm.eventTime = ZonedDateTime.parse(splits[2]).toLocalDateTime();
                 return tm;
             } catch (UnsupportedEncodingException var4) {
                 throw new SerializationException("Error when deserializing byte[] to string due to unsupported encoding " + this.ENCODING);

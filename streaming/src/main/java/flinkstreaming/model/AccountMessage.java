@@ -1,10 +1,13 @@
 package flinkstreaming.model;
 
+import org.apache.flink.table.api.DataTypes;
+import org.apache.flink.table.api.Schema;
 import org.apache.kafka.common.errors.SerializationException;
 import org.apache.kafka.common.serialization.Deserializer;
 
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
+import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 
 public class AccountMessage implements Serializable {
@@ -12,7 +15,7 @@ public class AccountMessage implements Serializable {
     public int accountId;
     public int customerId;
     public String message;
-    public ZonedDateTime eventTime;
+    public LocalDateTime eventTime;
 
     @Override
     public String toString() {
@@ -22,6 +25,16 @@ public class AccountMessage implements Serializable {
                 ", message='" + message + '\'' +
                 ", eventTime=" + eventTime +
                 '}';
+    }
+
+    public static Schema tableSchema() {
+        return Schema.newBuilder()
+                .column("accountId", DataTypes.INT().notNull())
+                .column("customerId", DataTypes.INT().notNull())
+                .column("message", DataTypes.STRING().notNull())
+                .column("eventTime", DataTypes.TIMESTAMP().notNull())
+                .primaryKey("accountId")
+                .build();
     }
 
     public static class AccountMessageDeserializer implements Deserializer<AccountMessage> {
@@ -41,7 +54,7 @@ public class AccountMessage implements Serializable {
                 am.accountId = Integer.parseInt(splits[0]);
                 am.customerId = Integer.parseInt(splits[1]);
                 am.message = splits[2];
-                am.eventTime = ZonedDateTime.parse(splits[3]);
+                am.eventTime = ZonedDateTime.parse(splits[3]).toLocalDateTime();
                 return am;
             } catch (UnsupportedEncodingException var4) {
                 throw new SerializationException("Error when deserializing byte[] to string due to unsupported encoding " + this.ENCODING);

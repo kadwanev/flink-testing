@@ -6,7 +6,7 @@ import flinkstreaming.model.CustomerMessage;
 import flinkstreaming.model.TransactionMessage;
 
 import java.sql.*;
-import java.time.ZonedDateTime;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
@@ -215,7 +215,7 @@ public class SqliteStore {
         cm.email = rs.getString(2);
         cm.notifyPreference = rs.getInt(3) == 1 ? true : false;
         cm.state = rs.getString(4);
-        cm.eventTime = ZonedDateTime.parse(rs.getString(5));
+        cm.eventTime = LocalDateTime.parse(rs.getString(5));
         return cm;
     }
     private AccountMessage loadAccount(ResultSet rs) throws SQLException {
@@ -223,14 +223,14 @@ public class SqliteStore {
         am.accountId = rs.getInt(1);
         am.customerId = rs.getInt(2);
         am.message = rs.getString(3);
-        am.eventTime = ZonedDateTime.parse(rs.getString(4));
+        am.eventTime = LocalDateTime.parse(rs.getString(4));
         return am;
     }
     private TransactionMessage loadTransaction(ResultSet rs) throws SQLException {
         TransactionMessage tm = new TransactionMessage();
         tm.accountId = rs.getInt(1);
         tm.amount = rs.getInt(2);
-        tm.eventTime = ZonedDateTime.parse(rs.getString(3));
+        tm.eventTime = LocalDateTime.parse(rs.getString(3));
         return tm;
     }
 
@@ -255,7 +255,7 @@ public class SqliteStore {
                     "    updateSource=excluded.updateSource," +
                     "    lastUpdated=excluded.lastUpdated; "
     );
-    public void insertCustomerValueQueryTable(int customerId, String value, String updateSource, ZonedDateTime lastUpdated) throws SQLException {
+    public void insertCustomerValueQueryTable(int customerId, String value, String updateSource, LocalDateTime lastUpdated) throws SQLException {
         PreparedStatement stmt = this.conn.prepareStatement(CUSTOMER_VALUE_QUERY_INSERT_STMT);
         stmt.setInt(1, customerId);
         stmt.setString(2, value);

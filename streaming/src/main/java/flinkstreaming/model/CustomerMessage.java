@@ -1,9 +1,12 @@
 package flinkstreaming.model;
 
+import org.apache.flink.table.api.DataTypes;
+import org.apache.flink.table.api.Schema;
 import org.apache.kafka.common.errors.SerializationException;
 import org.apache.kafka.common.serialization.Deserializer;
 
 import java.io.UnsupportedEncodingException;
+import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 
 public class CustomerMessage {
@@ -12,7 +15,7 @@ public class CustomerMessage {
     public String email;
     public boolean notifyPreference;
     public String state;
-    public ZonedDateTime eventTime;
+    public LocalDateTime eventTime;
 
     @Override
     public String toString() {
@@ -23,6 +26,17 @@ public class CustomerMessage {
                 ", state='" + state + '\'' +
                 ", eventTime=" + eventTime +
                 '}';
+    }
+
+    public static Schema tableSchema() {
+        return Schema.newBuilder()
+                .column("customerId", DataTypes.INT().notNull())
+                .column("email", DataTypes.STRING().notNull())
+                .column("notifyPreference", DataTypes.BOOLEAN().notNull())
+                .column("state", DataTypes.STRING().notNull())
+                .column("eventTime", DataTypes.TIMESTAMP().notNull())
+                .primaryKey("customerId")
+                .build();
     }
 
     public static class CustomerMessageDeserializer implements Deserializer<CustomerMessage> {
@@ -43,7 +57,7 @@ public class CustomerMessage {
                 cm.email = splits[1];
                 cm.notifyPreference = Boolean.parseBoolean(splits[2]);
                 cm.state = splits[3];
-                cm.eventTime = ZonedDateTime.parse(splits[4]);
+                cm.eventTime = ZonedDateTime.parse(splits[4]).toLocalDateTime();
                 return cm;
             } catch (UnsupportedEncodingException var4) {
                 throw new SerializationException("Error when deserializing byte[] to string due to unsupported encoding " + this.ENCODING);

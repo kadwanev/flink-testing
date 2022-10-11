@@ -17,7 +17,7 @@ import org.apache.flink.streaming.api.functions.async.ResultFuture;
 import org.apache.flink.streaming.api.functions.async.RichAsyncFunction;
 import org.apache.flink.util.Collector;
 
-import java.time.ZonedDateTime;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -83,10 +83,10 @@ public class QueryJoinCustomerValuable {
             return new Tuple2<>(values.f0, "LOW");
         }
 
-        public static class CustomerSource extends ProcessFunction<Tuple2<CustomerMessage, Optional<Tuple2<CustomerMessage, List<Tuple2<AccountMessage, TransactionMessage>>>>>, Tuple4<CustomerMessage, String, String, ZonedDateTime>> {
+        public static class CustomerSource extends ProcessFunction<Tuple2<CustomerMessage, Optional<Tuple2<CustomerMessage, List<Tuple2<AccountMessage, TransactionMessage>>>>>, Tuple4<CustomerMessage, String, String, LocalDateTime>> {
 
             @Override
-            public void processElement(Tuple2<CustomerMessage, Optional<Tuple2<CustomerMessage, List<Tuple2<AccountMessage, TransactionMessage>>>>> data, Context context, Collector<Tuple4<CustomerMessage, String, String, ZonedDateTime>> out) throws Exception {
+            public void processElement(Tuple2<CustomerMessage, Optional<Tuple2<CustomerMessage, List<Tuple2<AccountMessage, TransactionMessage>>>>> data, Context context, Collector<Tuple4<CustomerMessage, String, String, LocalDateTime>> out) throws Exception {
 
                 if (data.f1.isPresent()) {
                     Tuple2<CustomerMessage, List<Tuple2<AccountMessage, TransactionMessage>>> values = data.f1.get();
@@ -96,10 +96,10 @@ public class QueryJoinCustomerValuable {
             }
         }
 
-        public static class AccountSource extends ProcessFunction<Tuple2<AccountMessage, Optional<Tuple2<CustomerMessage, List<Tuple2<AccountMessage, TransactionMessage>>>>>, Tuple4<CustomerMessage, String, String,ZonedDateTime>> {
+        public static class AccountSource extends ProcessFunction<Tuple2<AccountMessage, Optional<Tuple2<CustomerMessage, List<Tuple2<AccountMessage, TransactionMessage>>>>>, Tuple4<CustomerMessage, String, String, LocalDateTime>> {
 
             @Override
-            public void processElement(Tuple2<AccountMessage, Optional<Tuple2<CustomerMessage, List<Tuple2<AccountMessage, TransactionMessage>>>>> data, Context context, Collector<Tuple4<CustomerMessage, String,String,ZonedDateTime>> out) throws Exception {
+            public void processElement(Tuple2<AccountMessage, Optional<Tuple2<CustomerMessage, List<Tuple2<AccountMessage, TransactionMessage>>>>> data, Context context, Collector<Tuple4<CustomerMessage, String,String,LocalDateTime>> out) throws Exception {
 
                 if (data.f1.isPresent()) {
                     Tuple2<CustomerMessage, List<Tuple2<AccountMessage, TransactionMessage>>> values = data.f1.get();
@@ -109,10 +109,10 @@ public class QueryJoinCustomerValuable {
             }
         }
 
-        public static class TransactionSource extends ProcessFunction<Tuple2<TransactionMessage, Optional<Tuple2<CustomerMessage, List<Tuple2<AccountMessage, TransactionMessage>>>>>, Tuple4<CustomerMessage, String, String, ZonedDateTime>> {
+        public static class TransactionSource extends ProcessFunction<Tuple2<TransactionMessage, Optional<Tuple2<CustomerMessage, List<Tuple2<AccountMessage, TransactionMessage>>>>>, Tuple4<CustomerMessage, String, String, LocalDateTime>> {
 
             @Override
-            public void processElement(Tuple2<TransactionMessage, Optional<Tuple2<CustomerMessage, List<Tuple2<AccountMessage, TransactionMessage>>>>> data, Context context, Collector<Tuple4<CustomerMessage, String, String, ZonedDateTime>> out) throws Exception {
+            public void processElement(Tuple2<TransactionMessage, Optional<Tuple2<CustomerMessage, List<Tuple2<AccountMessage, TransactionMessage>>>>> data, Context context, Collector<Tuple4<CustomerMessage, String, String, LocalDateTime>> out) throws Exception {
 
                 if (data.f1.isPresent()) {
                     Tuple2<CustomerMessage, List<Tuple2<AccountMessage, TransactionMessage>>> values = data.f1.get();

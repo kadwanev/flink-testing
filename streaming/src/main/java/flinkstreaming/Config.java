@@ -12,6 +12,8 @@ import org.apache.flink.streaming.api.CheckpointingMode;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.api.environment.CheckpointConfig;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+import org.apache.flink.table.api.TableEnvironment;
+import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
 import org.apache.kafka.clients.consumer.OffsetResetStrategy;
 
 import java.util.Arrays;
@@ -61,6 +63,10 @@ public class Config {
         env.getCheckpointConfig().enableUnalignedCheckpoints();
 
         return env;
+    }
+
+    public static TableEnvironment getTableEnvironment(StreamExecutionEnvironment env) {
+        return StreamTableEnvironment.create(env);
     }
 
     public static DataStreamSource<CustomerMessage> getCustomersStream(String consumerGroupId, StreamExecutionEnvironment env) {
